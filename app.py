@@ -87,11 +87,19 @@ elif page == "Demo":
         st.write("Use fungicide and avoid overwatering.")
 
     # ---------------- VOICE ----------------
-    st.subheader("🎤 Ask using Voice")
-    audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
+   st.subheader("🎤 Ask using Voice")
 
-    if audio:
-        st.success("Voice recorded!")
+audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
+
+if audio:
+    st.success("Voice recorded!")
+
+    # Show audio player
+    st.audio(audio["bytes"], format="audio/wav")
+
+    # Demo text output (for exam)
+    st.subheader("🗣️ Interpreted Query")
+    st.write("This is a sample voice query about plant disease.")
 
 # ---------------- CHATBOT ----------------
 elif page == "Chatbot":
