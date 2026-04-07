@@ -85,6 +85,18 @@ elif page == "Demo":
         st.subheader("💊 Treatment")
         st.write("Use fungicide and avoid overwatering.")
 
+    # Voice section
+    st.subheader("🎤 Ask using Voice")
+
+    audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
+
+    if audio:
+        st.success("Voice recorded!")
+        st.audio(audio["bytes"], format="audio/wav")
+
+        st.subheader("🗣️ Interpreted Query")
+        st.write("This is a sample voice query about plant disease.")
+
     # 🎤 Voice Section
     st.subheader("🎤 Ask using Voice")
 
