@@ -8,9 +8,7 @@ Original file is located at
 """
 import streamlit as st
 from PIL import Image
-import numpy as np
 from streamlit_mic_recorder import mic_recorder
-import openai
 def set_bg():
     st.markdown(
         """
@@ -39,13 +37,10 @@ def set_bg():
     )
 
 set_bg()
-# ---------------- SETTINGS ----------------
+
 st.set_page_config(page_title="AI Smart Plant Assistant", page_icon="🌱", layout="wide")
 
-# 👉 Add your OpenAI API key here
-openai.api_key = "YOUR_API_KEY_HERE"
-
-# ---------------- SIDEBAR ----------------
+# Sidebar
 st.sidebar.title("🌿 AI Plant Assistant")
 page = st.sidebar.radio("Navigate", ["Home", "Demo", "Chatbot", "About"])
 
@@ -54,17 +49,7 @@ if page == "Home":
     st.title("🌱 AI Smart Plant Assistant")
     st.subheader("Detect. Diagnose. Protect Crops with AI")
 
-    st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6", use_column_width=True)
-
-    st.markdown("""
-    ### 🚀 Features:
-    - 🧠 AI Disease Detection  
-    - 🤖 LLM Chatbot  
-    - 🎤 Voice Input  
-    - 🌾 Farmer-friendly UI  
-    """)
-
-# ---------------- DEMO (ML MODEL) ----------------
+# ---------------- DEMO ----------------
 elif page == "Demo":
     st.title("🔬 Plant Disease Detection")
 
@@ -95,88 +80,25 @@ elif page == "Demo":
         st.audio(audio["bytes"], format="audio/wav")
 
         st.subheader("🗣️ Interpreted Query")
-        st.write("This is a sample voice query about plant disease.")
-
-    # 🎤 Voice Section
-    st.subheader("🎤 Ask using Voice")
-
-    audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
-
-    if audio:
-        st.success("Voice recorded!")
-        st.audio(audio["bytes"], format="audio/wav")
-
-        st.subheader("🗣️ Interpreted Query")
-        st.write("This is a sample voice query about plant disease.")
-
-    # ---------------- VOICE ----------------
-   st.subheader("🎤 Ask using Voice")
-
-audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
-
-if audio:
-    st.success("Voice recorded!")
-
-    # Show audio player
-    st.audio(audio["bytes"], format="audio/wav")
-
-    # Demo text output (for exam)
-    st.subheader("🗣️ Interpreted Query")
-    st.write("This is a sample voice query about plant disease.")
+        st.write("Sample query: What disease is this plant having?")
 
 # ---------------- CHATBOT ----------------
 elif page == "Chatbot":
     st.title("🤖 AI Chatbot")
-
-    user_input = st.text_input("Ask anything about plant diseases:")
+    user_input = st.text_input("Ask about plant diseases:")
 
     if user_input:
-        if openai.api_key == "":
-            st.warning("Chatbot is in demo mode (no API key).")
-            st.write("🌿 AI: This disease may be caused by environmental stress. Please consult an expert.")
-        else:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an agriculture expert helping farmers."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-
-            reply = response["choices"][0]["message"]["content"]
-            st.write("🌿 AI:", reply)
+        st.write("🌿 AI: This may be caused by fungal infection. Use proper treatment.")
 
 # ---------------- ABOUT ----------------
 elif page == "About":
-    st.title("📖 About the Project")
+    st.title("📖 About")
 
-    st.markdown("""
-    ### 🌱 AI Smart Plant Assistant
+    st.write("""
+    AI Smart Plant Assistant helps farmers detect diseases and get guidance.
 
-    The **AI Smart Plant Assistant** is an intelligent web application designed to help farmers detect plant diseases and receive instant guidance using Artificial Intelligence and Large Language Models (LLMs).
-
-    ### 🎯 Problem Statement
-    Farmers often face difficulty in identifying plant diseases early due to lack of expert support, leading to crop loss and reduced productivity.
-
-    ### 💡 Solution
-    This system uses:
-    - 🧠 **AI-based image analysis** for disease detection  
-    - 🤖 **LLM-powered chatbot** for explanations and guidance  
-    - 🎤 **Voice input** for easy interaction  
-
-    ### 🚀 Key Features
-    - Upload plant images for disease detection  
-    - Get instant diagnosis and treatment suggestions  
-    - Ask questions using chatbot  
-    - Simple and user-friendly interface  
-
-    ### 🌍 Impact
-    - Supports **sustainable agriculture**  
-    - Helps farmers make better decisions  
-    - Reduces crop damage and financial loss  
-
-    ### 👩‍💻 Developed By
-    **Rachel Edwin**  
-    BTech CSE (AI & ML)  
-    Alliance University  
+    Developed by:
+    Rachel Edwin
+    BTech CSE AIML
+    Alliance University
     """)
