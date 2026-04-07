@@ -91,14 +91,36 @@ elif page == "Chatbot":
         st.write("🌿 AI: This may be caused by fungal infection. Use proper treatment.")
 
 # ---------------- ABOUT ----------------
-elif page == "About":
-    st.title("📖 About")
+ elif page == "About":
+    st.title("📖 About the Project")
 
-    st.write("""
-    AI Smart Plant Assistant helps farmers detect diseases and get guidance.
+    st.markdown("""
+    ### 🌱 AI Smart Plant Assistant
 
-    Developed by:
-    Rachel Edwin
-    BTech CSE AIML
-    Alliance University
+    The **AI Smart Plant Assistant** is an intelligent web application designed to help farmers detect plant diseases and receive instant guidance using Artificial Intelligence and Large Language Models (LLMs).
+
+    ### 🎯 Problem Statement
+    Farmers often face difficulty in identifying plant diseases early due to lack of expert support, leading to crop loss and reduced productivity.
+
+    ### 💡 Solution
+    This system uses:
+    - 🧠 **AI-based image analysis** for disease detection  
+    - 🤖 **LLM-powered chatbot** for explanations and guidance  
+    - 🎤 **Voice input** for easy interaction  
+
+    ### 🚀 Key Features
+    - Upload plant images for disease detection  
+    - Get instant diagnosis and treatment suggestions  
+    - Ask questions using chatbot  
+    - Simple and user-friendly interface  
+
+    ### 🌍 Impact
+    - Supports **sustainable agriculture**  
+    - Helps farmers make better decisions  
+    - Reduces crop damage and financial loss  
+
+    ### 👩‍💻 Developed By
+    **Rachel Edwin**  
+    BTech CSE (AI & ML)  
+    Alliance University  
     """)
