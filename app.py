@@ -91,7 +91,7 @@ elif page == "Chatbot":
         st.write("🌿 AI: This may be caused by fungal infection. Use proper treatment.")
 
 # ---------------- ABOUT ----------------
- elif page == "About":
+ elif page == "About"
     st.title("📖 About the Project")
 
     st.markdown("""
