@@ -8,119 +8,87 @@ Original file is located at
 """
 import streamlit as st
 from PIL import Image
+import numpy as np
 from streamlit_mic_recorder import mic_recorder
-def set_bg():
-    st.markdown(
-        """
-        <style>
-        .stApp {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: white;
-        }
+import openai
+import tensorflow as tf
 
-        h1, h2, h3 {
-            color: #00ffcc;
-        }
+# 🔑 ADD YOUR KEY
+openai.api_key = "YOUR_API_KEY_HERE"
 
-        .stButton>button {
-            background-color: #00ffcc;
-            color: black;
-            border-radius: 10px;
-        }
+st.set_page_config(page_title="AI Plant Assistant", layout="wide")
 
-        .stTextInput>div>div>input {
-            border-radius: 10px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# ---------- UI ----------
+st.markdown("""
+<style>
+.stApp {
+    background: linear-gradient(135deg,#1e3c72,#2a5298);
+    color:white;
+}
+</style>
+""", unsafe_allow_html=True)
 
-set_bg()
+# ---------- MODEL ----------
+model = tf.keras.applications.MobileNetV2(weights="imagenet")
 
-st.set_page_config(page_title="AI Smart Plant Assistant", page_icon="🌱", layout="wide")
+def predict(img):
+    img = img.resize((224,224))
+    x = np.array(img)/255.0
+    x = np.expand_dims(x, axis=0)
+    preds = model.predict(x)
+    return str(np.argmax(preds))
 
-# Sidebar
-st.sidebar.title("🌿 AI Plant Assistant")
-page = st.sidebar.radio("Navigate", ["Home", "Demo", "Chatbot", "About"])
+# ---------- NAV ----------
+page = st.sidebar.radio("Menu", ["Home","Detection","Voice AI","Chatbot"])
 
-# ---------------- HOME ----------------
+# ---------- HOME ----------
 if page == "Home":
     st.title("🌱 AI Smart Plant Assistant")
-    st.subheader("Detect. Diagnose. Protect Crops with AI")
+    st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6")
 
-# ---------------- DEMO ----------------
-elif page == "Demo":
-    st.title("🔬 Plant Disease Detection")
+# ---------- DETECTION ----------
+elif page == "Detection":
+    st.title("🌿 Disease Detection")
 
-    uploaded_file = st.file_uploader("Upload Plant Image", type=["jpg", "png"])
+    file = st.file_uploader("Upload Plant Image")
 
-    if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+    if file:
+        img = Image.open(file)
+        st.image(img)
 
-        st.success("✅ Analysis Complete")
+        result = predict(img)
 
-        st.subheader("🧠 Prediction")
-        st.write("Leaf Spot Disease")
+        st.subheader("Prediction")
+        st.write("Detected class:", result)
 
-        st.subheader("📖 Explanation")
-        st.write("Caused by fungal infection due to excess moisture.")
+# ---------- VOICE ----------
+elif page == "Voice AI":
+    st.title("🎤 Voice Assistant")
 
-        st.subheader("💊 Treatment")
-        st.write("Use fungicide and avoid overwatering.")
-
-    # Voice section
-    st.subheader("🎤 Ask using Voice")
-
-    audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
+    audio = mic_recorder()
 
     if audio:
-        st.success("Voice recorded!")
-        st.audio(audio["bytes"], format="audio/wav")
+        st.success("Processing voice...")
 
-        st.subheader("🗣️ Interpreted Query")
-        st.write("Sample query: What disease is this plant having?")
+        # Save audio
+        with open("audio.wav","wb") as f:
+            f.write(audio["bytes"])
 
-# ---------------- CHATBOT ----------------
+        # Whisper API
+        transcript = openai.Audio.transcribe("whisper-1", open("audio.wav","rb"))
+
+        st.write("You said:", transcript["text"])
+
+# ---------- CHATBOT ----------
 elif page == "Chatbot":
-    st.title("🤖 AI Chatbot")
-    user_input = st.text_input("Ask about plant diseases:")
+    st.title("🤖 GPT Chatbot")
 
-    if user_input:
-        st.write("🌿 AI: This may be caused by fungal infection. Use proper treatment.")
+    user = st.text_input("Ask anything about plants")
 
-# ---------------- ABOUT ----------------
- elif page == "About"
-    st.title("📖 About the Project")
+    if user:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role":"user","content":user}]
+        )
 
-    st.markdown("""
-    ### 🌱 AI Smart Plant Assistant
-
-    The **AI Smart Plant Assistant** is an intelligent web application designed to help farmers detect plant diseases and receive instant guidance using Artificial Intelligence and Large Language Models (LLMs).
-
-    ### 🎯 Problem Statement
-    Farmers often face difficulty in identifying plant diseases early due to lack of expert support, leading to crop loss and reduced productivity.
-
-    ### 💡 Solution
-    This system uses:
-    - 🧠 **AI-based image analysis** for disease detection  
-    - 🤖 **LLM-powered chatbot** for explanations and guidance  
-    - 🎤 **Voice input** for easy interaction  
-
-    ### 🚀 Key Features
-    - Upload plant images for disease detection  
-    - Get instant diagnosis and treatment suggestions  
-    - Ask questions using chatbot  
-    - Simple and user-friendly interface  
-
-    ### 🌍 Impact
-    - Supports **sustainable agriculture**  
-    - Helps farmers make better decisions  
-    - Reduces crop damage and financial loss  
-
-    ### 👩‍💻 Developed By
-    **Rachel Edwin**  
-    BTech CSE (AI & ML)  
-    Alliance University  
-    """)
+        st.write(response["choices"][0]["message"]["content"])
