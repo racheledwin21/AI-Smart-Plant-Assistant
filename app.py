@@ -11,7 +11,34 @@ from PIL import Image
 import numpy as np
 from streamlit_mic_recorder import mic_recorder
 import openai
+def set_bg():
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+        }
 
+        h1, h2, h3 {
+            color: #00ffcc;
+        }
+
+        .stButton>button {
+            background-color: #00ffcc;
+            color: black;
+            border-radius: 10px;
+        }
+
+        .stTextInput>div>div>input {
+            border-radius: 10px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+set_bg()
 # ---------------- SETTINGS ----------------
 st.set_page_config(page_title="AI Smart Plant Assistant", page_icon="🌱", layout="wide")
 
@@ -90,13 +117,35 @@ elif page == "Chatbot":
 
 # ---------------- ABOUT ----------------
 elif page == "About":
-    st.title("📖 About")
+    st.title("📖 About the Project")
 
-    st.write("""
-    This project helps farmers detect plant diseases using AI and provides guidance using LLM.
+    st.markdown("""
+    ### 🌱 AI Smart Plant Assistant
 
-    Developed by:
-    Rachel Edwin  
-    BTech CSE AIML  
+    The **AI Smart Plant Assistant** is an intelligent web application designed to help farmers detect plant diseases and receive instant guidance using Artificial Intelligence and Large Language Models (LLMs).
+
+    ### 🎯 Problem Statement
+    Farmers often face difficulty in identifying plant diseases early due to lack of expert support, leading to crop loss and reduced productivity.
+
+    ### 💡 Solution
+    This system uses:
+    - 🧠 **AI-based image analysis** for disease detection  
+    - 🤖 **LLM-powered chatbot** for explanations and guidance  
+    - 🎤 **Voice input** for easy interaction  
+
+    ### 🚀 Key Features
+    - Upload plant images for disease detection  
+    - Get instant diagnosis and treatment suggestions  
+    - Ask questions using chatbot  
+    - Simple and user-friendly interface  
+
+    ### 🌍 Impact
+    - Supports **sustainable agriculture**  
+    - Helps farmers make better decisions  
+    - Reduces crop damage and financial loss  
+
+    ### 👩‍💻 Developed By
+    **Rachel Edwin**  
+    BTech CSE (AI & ML)  
     Alliance University  
     """)
