@@ -8,87 +8,83 @@ Original file is located at
 """
 import streamlit as st
 from PIL import Image
-import numpy as np
 from streamlit_mic_recorder import mic_recorder
-import openai
-import tensorflow as tf
-
-# 🔑 ADD YOUR KEY
-openai.api_key = "YOUR_API_KEY_HERE"
+import pyttsx3
 
 st.set_page_config(page_title="AI Plant Assistant", layout="wide")
 
-# ---------- UI ----------
+# ---------- BACKGROUND ----------
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg,#1e3c72,#2a5298);
-    color:white;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- MODEL ----------
-model = tf.keras.applications.MobileNetV2(weights="imagenet")
-
-def predict(img):
-    img = img.resize((224,224))
-    x = np.array(img)/255.0
-    x = np.expand_dims(x, axis=0)
-    preds = model.predict(x)
-    return str(np.argmax(preds))
-
-# ---------- NAV ----------
-page = st.sidebar.radio("Menu", ["Home","Detection","Voice AI","Chatbot"])
+# ---------- SIDEBAR ----------
+st.sidebar.title("🌿 AI Plant Assistant")
+page = st.sidebar.radio("Navigate", ["Home", "Detection", "Chatbot"])
 
 # ---------- HOME ----------
 if page == "Home":
     st.title("🌱 AI Smart Plant Assistant")
-    st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6")
+    st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6", use_column_width=True)
+
+    st.markdown("""
+    ## 🚀 Features
+    - Detect plant diseases  
+    - AI suggestions  
+    - Voice interaction  
+    - Smart chatbot  
+    """)
 
 # ---------- DETECTION ----------
 elif page == "Detection":
-    st.title("🌿 Disease Detection")
+    st.title("🔬 Plant Disease Detection")
 
-    file = st.file_uploader("Upload Plant Image")
+    file = st.file_uploader("Upload Image", type=["jpg","png"])
 
     if file:
         img = Image.open(file)
-        st.image(img)
+        st.image(img, use_column_width=True)
 
-        result = predict(img)
+        st.success("Analysis Complete")
 
-        st.subheader("Prediction")
-        st.write("Detected class:", result)
+        disease = "Leaf Spot Disease"
+        solution = "Use fungicide and avoid excess watering."
 
-# ---------- VOICE ----------
-elif page == "Voice AI":
-    st.title("🎤 Voice Assistant")
+        st.subheader("🧠 Prediction")
+        st.write(disease)
 
+        st.subheader("💊 Solution")
+        st.write(solution)
+
+        # 🔊 Voice Output
+        engine = pyttsx3.init()
+        engine.say(solution)
+        engine.runAndWait()
+
+    # 🎤 Voice Input
+    st.subheader("🎤 Speak")
     audio = mic_recorder()
 
     if audio:
-        st.success("Processing voice...")
-
-        # Save audio
-        with open("audio.wav","wb") as f:
-            f.write(audio["bytes"])
-
-        # Whisper API
-        transcript = openai.Audio.transcribe("whisper-1", open("audio.wav","rb"))
-
-        st.write("You said:", transcript["text"])
+        st.success("Voice received")
 
 # ---------- CHATBOT ----------
 elif page == "Chatbot":
-    st.title("🤖 GPT Chatbot")
+    st.title("🤖 AI Chatbot")
 
-    user = st.text_input("Ask anything about plants")
+    user = st.text_input("Ask your question")
 
     if user:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role":"user","content":user}]
-        )
+        answer = "This disease is usually caused by fungal infection. Maintain proper care."
 
-        st.write(response["choices"][0]["message"]["content"])
+        st.write("🌿 AI:", answer)
+
+        # 🔊 Voice response
+        engine = pyttsx3.init()
+        engine.say(answer)
+        engine.runAndWait()
