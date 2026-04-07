@@ -1,0 +1,5 @@
+streamlit
+pillow
+numpy
+openai
+streamlit-mic-recorder
