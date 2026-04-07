@@ -9,82 +9,57 @@ Original file is located at
 import streamlit as st
 from PIL import Image
 from streamlit_mic_recorder import mic_recorder
-import pyttsx3
 
 st.set_page_config(page_title="AI Plant Assistant", layout="wide")
 
-# ---------- BACKGROUND ----------
+# UI
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    color: white;
+    background: linear-gradient(135deg,#1e3c72,#2a5298);
+    color:white;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- SIDEBAR ----------
-st.sidebar.title("🌿 AI Plant Assistant")
-page = st.sidebar.radio("Navigate", ["Home", "Detection", "Chatbot"])
+page = st.sidebar.radio("Menu", ["Home","Detection","Voice","Chatbot"])
 
-# ---------- HOME ----------
+# HOME
 if page == "Home":
     st.title("🌱 AI Smart Plant Assistant")
-    st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6", use_column_width=True)
+    st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6")
 
-    st.markdown("""
-    ## 🚀 Features
-    - Detect plant diseases  
-    - AI suggestions  
-    - Voice interaction  
-    - Smart chatbot  
-    """)
-
-# ---------- DETECTION ----------
+# DETECTION
 elif page == "Detection":
-    st.title("🔬 Plant Disease Detection")
+    st.title("🌿 Disease Detection")
 
-    file = st.file_uploader("Upload Image", type=["jpg","png"])
+    file = st.file_uploader("Upload Image")
 
     if file:
         img = Image.open(file)
-        st.image(img, use_column_width=True)
+        st.image(img)
 
-        st.success("Analysis Complete")
+        st.subheader("Prediction")
+        st.write("Leaf Spot Disease")
 
-        disease = "Leaf Spot Disease"
-        solution = "Use fungicide and avoid excess watering."
+        st.subheader("Solution")
+        st.write("Use fungicide and reduce watering")
 
-        st.subheader("🧠 Prediction")
-        st.write(disease)
+# VOICE
+elif page == "Voice":
+    st.title("🎤 Voice Input")
 
-        st.subheader("💊 Solution")
-        st.write(solution)
-
-        # 🔊 Voice Output
-        engine = pyttsx3.init()
-        engine.say(solution)
-        engine.runAndWait()
-
-    # 🎤 Voice Input
-    st.subheader("🎤 Speak")
     audio = mic_recorder()
 
     if audio:
         st.success("Voice received")
+        st.audio(audio["bytes"])
 
-# ---------- CHATBOT ----------
+# CHATBOT
 elif page == "Chatbot":
-    st.title("🤖 AI Chatbot")
+    st.title("🤖 Chatbot")
 
-    user = st.text_input("Ask your question")
+    user = st.text_input("Ask about plants")
 
     if user:
-        answer = "This disease is usually caused by fungal infection. Maintain proper care."
-
-        st.write("🌿 AI:", answer)
-
-        # 🔊 Voice response
-        engine = pyttsx3.init()
-        engine.say(answer)
-        engine.runAndWait()
+        st.write("🌿 AI: This could be a fungal infection. Maintain proper care.")
