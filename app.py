@@ -11,12 +11,17 @@ from PIL import Image
 from streamlit_mic_recorder import mic_recorder
 import tempfile
 import openai
+
+# ✅ FIRST
+st.set_page_config(page_title="AI Smart Plant Assistant", layout="wide")
+
+# THEN background
 def set_bg():
     st.markdown(
         """
         <style>
         .stApp {
-            background: url("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/background.png");
+            background: url("https://raw.githubusercontent.com/racheledwin21/AI-Smart-Plant-Assistant/main/background.png");
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
