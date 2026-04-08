@@ -9,10 +9,16 @@ Original file is located at
 import streamlit as st
 from PIL import Image
 from streamlit_mic_recorder import mic_recorder
+import openai
+import tempfile
 
-st.set_page_config(page_title="AI Plant Assistant", layout="wide")
+# ---------------- SETTINGS ----------------
+st.set_page_config(page_title="AI Smart Plant Assistant", layout="wide")
 
-# UI
+# API KEY
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+# ---------------- UI STYLE ----------------
 st.markdown("""
 <style>
 .stApp {
@@ -22,35 +28,33 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------- SIDEBAR ----------------
 page = st.sidebar.radio("Menu", ["Home","Detection","Voice","Chatbot"])
 
-# HOME
+# ---------------- HOME ----------------
 if page == "Home":
     st.title("🌱 AI Smart Plant Assistant")
     st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6")
+    st.write("Detect plant diseases, ask questions, and use voice AI.")
 
-# DETECTION
+# ---------------- DETECTION ----------------
 elif page == "Detection":
-    st.title("🌿 Disease Detection")
+    st.title("🌿 Plant Disease Detection")
 
-    file = st.file_uploader("Upload Image")
+    file = st.file_uploader("Upload Plant Image")
 
     if file:
         img = Image.open(file)
         st.image(img)
 
-        st.subheader("Prediction")
+        # Demo prediction
+        st.subheader("🧠 Prediction")
         st.write("Leaf Spot Disease")
 
-        st.subheader("Solution")
-        st.write("Use fungicide and reduce watering")
+        st.subheader("💊 Solution")
+        st.write("Use fungicide and avoid excess watering.")
 
-# VOICE
-import openai
-import tempfile
-
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
+# ---------------- VOICE ----------------
 elif page == "Voice":
     st.title("🎤 Voice AI Assistant")
 
@@ -59,56 +63,47 @@ elif page == "Voice":
     if audio:
         st.success("Processing voice...")
 
-        # Save audio file
+        # Save audio
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
             f.write(audio["bytes"])
             audio_path = f.name
 
-        # 🎤 Convert speech → text (Whisper)
-        with open(audio_path, "rb") as audio_file:
-            transcript = openai.Audio.transcribe("whisper-1", audio_file)
-
+        # 🎤 Speech → Text (Whisper)
+        transcript = openai.Audio.transcribe("whisper-1", open(audio_path, "rb"))
         user_text = transcript["text"]
+
         st.subheader("🗣️ You said:")
         st.write(user_text)
 
         # 🤖 GPT response
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": user_text}]
+            messages=[
+                {"role": "system", "content": "You are an expert in plant diseases and agriculture."},
+                {"role": "user", "content": user_text}
+            ]
         )
 
         reply = response["choices"][0]["message"]["content"]
 
         st.subheader("🌿 AI Response:")
         st.write(reply)
-# CHATBOT
-import openai
 
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-
+# ---------------- CHATBOT ----------------
 elif page == "Chatbot":
     st.title("🤖 AI Chatbot")
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    user = st.text_input("Ask anything about plants")
 
-    user_input = st.text_input("Ask anything about plants")
-
-    if user_input:
-        st.session_state.messages.append({"role": "user", "content": user_input})
-
+    if user:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=st.session_state.messages
+            messages=[
+                {"role": "system", "content": "You are an expert in plant diseases and agriculture."},
+                {"role": "user", "content": user}
+            ]
         )
 
         reply = response["choices"][0]["message"]["content"]
 
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-
-    for msg in st.session_state.messages:
-        if msg["role"] == "user":
-            st.write("🧑:", msg["content"])
-        else:
-            st.write("🌿 AI:", msg["content"])
+        st.write("🌿 AI:", reply)
