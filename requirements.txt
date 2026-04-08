@@ -2,3 +2,4 @@ streamlit
 pillow
 numpy
 streamlit-mic-recorder
+openai
