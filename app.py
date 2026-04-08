@@ -46,20 +46,67 @@ elif page == "Detection":
         st.write("Use fungicide and reduce watering")
 
 # VOICE
-elif page == "Voice":
-    st.title("🎤 Voice Input")
+import openai
+import tempfile
 
-    audio = mic_recorder()
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
+elif page == "Voice":
+    st.title("🎤 Voice AI Assistant")
+
+    audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
 
     if audio:
-        st.success("Voice received")
-        st.audio(audio["bytes"])
+        st.success("Processing...")
+
+        # Save audio
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+            f.write(audio["bytes"])
+            audio_path = f.name
+
+        # 🎤 Speech → Text (Whisper)
+        transcript = openai.Audio.transcribe("whisper-1", open(audio_path, "rb"))
+
+        user_text = transcript["text"]
+        st.write("🗣️ You said:", user_text)
+
+        # 🤖 GPT response
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": user_text}]
+        )
+
+        reply = response["choices"][0]["message"]["content"]
+
+        st.write("🌿 AI:", reply)
 
 # CHATBOT
+import openai
+
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
 elif page == "Chatbot":
-    st.title("🤖 Chatbot")
+    st.title("🤖 AI Chatbot")
 
-    user = st.text_input("Ask about plants")
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-    if user:
-        st.write("🌿 AI: This could be a fungal infection. Maintain proper care.")
+    user_input = st.text_input("Ask anything about plants")
+
+    if user_input:
+        st.session_state.messages.append({"role": "user", "content": user_input})
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=st.session_state.messages
+        )
+
+        reply = response["choices"][0]["message"]["content"]
+
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            st.write("🧑:", msg["content"])
+        else:
+            st.write("🌿 AI:", msg["content"])
