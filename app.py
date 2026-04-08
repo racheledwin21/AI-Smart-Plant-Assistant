@@ -57,18 +57,20 @@ elif page == "Voice":
     audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
 
     if audio:
-        st.success("Processing...")
+        st.success("Processing voice...")
 
-        # Save audio
+        # Save audio file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
             f.write(audio["bytes"])
             audio_path = f.name
 
-        # 🎤 Speech → Text (Whisper)
-        transcript = openai.Audio.transcribe("whisper-1", open(audio_path, "rb"))
+        # 🎤 Convert speech → text (Whisper)
+        with open(audio_path, "rb") as audio_file:
+            transcript = openai.Audio.transcribe("whisper-1", audio_file)
 
         user_text = transcript["text"]
-        st.write("🗣️ You said:", user_text)
+        st.subheader("🗣️ You said:")
+        st.write(user_text)
 
         # 🤖 GPT response
         response = openai.ChatCompletion.create(
@@ -78,8 +80,8 @@ elif page == "Voice":
 
         reply = response["choices"][0]["message"]["content"]
 
-        st.write("🌿 AI:", reply)
-
+        st.subheader("🌿 AI Response:")
+        st.write(reply)
 # CHATBOT
 import openai
 
