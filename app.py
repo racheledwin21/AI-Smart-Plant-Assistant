@@ -9,16 +9,18 @@ Original file is located at
 import streamlit as st
 from PIL import Image
 from streamlit_mic_recorder import mic_recorder
-import openai
 import tempfile
+import openai
 
 # ---------------- SETTINGS ----------------
 st.set_page_config(page_title="AI Smart Plant Assistant", layout="wide")
 
-# API KEY
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# SAFE API KEY (no crash if missing)
+api_key = st.secrets.get("OPENAI_API_KEY", None)
+if api_key:
+    openai.api_key = api_key
 
-# ---------------- UI STYLE ----------------
+# ---------------- UI ----------------
 st.markdown("""
 <style>
 .stApp {
@@ -35,7 +37,7 @@ page = st.sidebar.radio("Menu", ["Home","Detection","Voice","Chatbot"])
 if page == "Home":
     st.title("🌱 AI Smart Plant Assistant")
     st.image("https://images.unsplash.com/photo-1501004318641-b39e6451bec6")
-    st.write("Detect plant diseases, ask questions, and use voice AI.")
+    st.write("Detect plant diseases, use voice, and ask AI questions.")
 
 # ---------------- DETECTION ----------------
 elif page == "Detection":
@@ -47,7 +49,6 @@ elif page == "Detection":
         img = Image.open(file)
         st.image(img)
 
-        # Demo prediction
         st.subheader("🧠 Prediction")
         st.write("Leaf Spot Disease")
 
@@ -56,38 +57,34 @@ elif page == "Detection":
 
 # ---------------- VOICE ----------------
 elif page == "Voice":
-    st.title("🎤 Voice AI Assistant")
+    st.title("🎤 Voice Assistant")
 
     audio = mic_recorder(start_prompt="🎙️ Start", stop_prompt="⏹️ Stop")
 
     if audio:
-        st.success("Processing voice...")
+        st.success("Voice received")
+        st.audio(audio["bytes"])
 
-        # Save audio
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
-            f.write(audio["bytes"])
-            audio_path = f.name
+        if not api_key:
+            st.write("🗣️ Sample: This is a demo voice query.")
+            st.write("🌿 AI: This may be a plant disease. Try proper care.")
+        else:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+                f.write(audio["bytes"])
+                audio_path = f.name
 
-        # 🎤 Speech → Text (Whisper)
-        transcript = openai.Audio.transcribe("whisper-1", open(audio_path, "rb"))
-        user_text = transcript["text"]
+            transcript = openai.Audio.transcribe("whisper-1", open(audio_path, "rb"))
+            user_text = transcript["text"]
 
-        st.subheader("🗣️ You said:")
-        st.write(user_text)
+            st.write("🗣️ You said:", user_text)
 
-        # 🤖 GPT response
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert in plant diseases and agriculture."},
-                {"role": "user", "content": user_text}
-            ]
-        )
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": user_text}]
+            )
 
-        reply = response["choices"][0]["message"]["content"]
-
-        st.subheader("🌿 AI Response:")
-        st.write(reply)
+            reply = response["choices"][0]["message"]["content"]
+            st.write("🌿 AI:", reply)
 
 # ---------------- CHATBOT ----------------
 elif page == "Chatbot":
@@ -96,14 +93,14 @@ elif page == "Chatbot":
     user = st.text_input("Ask anything about plants")
 
     if user:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert in plant diseases and agriculture."},
-                {"role": "user", "content": user}
-            ]
-        )
+        if not api_key:
+            st.warning("Running in demo mode")
+            st.write("🌿 AI: This may be a fungal infection. Use proper treatment.")
+        else:
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": user}]
+            )
 
-        reply = response["choices"][0]["message"]["content"]
-
-        st.write("🌿 AI:", reply)
+            reply = response["choices"][0]["message"]["content"]
+            st.write("🌿 AI:", reply)
